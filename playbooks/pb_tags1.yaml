@@ -1,0 +1,39 @@
+- hosts: servs
+  tasks:
+    - name: install git
+      ansible.builtin.apt:
+        name: git
+        state: present
+      become: yes
+      tags: git
+
+    - name: install make
+      ansible.builtin.apt:
+        name: make
+        state: present
+        update_cache: yes
+      become: yes
+      tags: make
+
+    - name: install nodejs
+      ansible.builtin.apt:
+        name: nodejs
+        state: present
+        update_cache: yes
+      become: yes
+      tags: [nodejs, nodejs_instl]
+
+    - name: version nodejs
+      ansible.builtin.command: 'nodejs -v'
+      become: yes
+      tags: [nodejs, nodejs_ver]
+
+    - name: add users
+      ansible.builtin.user:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - 'arya'
+        - 'sansa'
+        - 'tirion'
+      tags: users
