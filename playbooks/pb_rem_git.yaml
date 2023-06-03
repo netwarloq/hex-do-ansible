@@ -1,0 +1,8 @@
+- hosts: servs
+
+  tasks:
+    - name: remove git
+      ansible.builtin.apt:
+        name: git
+        state: absent
+        update_cache: yes
