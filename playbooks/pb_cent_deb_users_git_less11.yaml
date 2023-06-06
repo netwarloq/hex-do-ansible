@@ -1,4 +1,4 @@
-- hosts: deb-cent
+- hosts: debcent
   vars:
     users: [jaime, sansa, robert]
 

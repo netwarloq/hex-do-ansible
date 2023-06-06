@@ -1,0 +1,10 @@
+- hosts: all
+  gather_facts: no
+  vars:
+    path: /var/log/upstart/nginx.log
+  tasks:
+    - ansible.builtin.debug: msg={{ '192.0.2.1/24' | ipaddr('address') }}
+    - ansible.builtin.debug: msg={{ 'test1' | hash('sha1') }}
+    - ansible.builtin.debug: msg={{ path | basename }}
+    - ansible.builtin.debug: msg={{ path | dirname }}
+    - ansible.builtin.debug: msg={{ "~/Movies" | expanduser }}

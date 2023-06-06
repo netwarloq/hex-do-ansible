@@ -1,0 +1,13 @@
+- hosts: 127.0.0.1
+  connection: local
+  # gather_facts: no
+  vars: 
+    htwo:  "This is server {{ ansible_hostname }}"
+    ttime: "{{ '%a %d %b %Y %H:%M:%S' | strftime(ansible_date_time.epoch) }}"
+  tasks:
+    - ansible.builtin.debug: msg={{ ttime }}
+    - ansible.builtin.debug: msg={{ htwo | upper }}
+    - name: Save changes to file
+      ansible.builtin.template:
+        src: "../templates/index.html.j2"
+        dest: "../files/index2.html"  
