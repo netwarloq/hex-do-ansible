@@ -1,0 +1,53 @@
+- hosts: buntuhttp
+  vars:
+    src_dir: ../files
+    src_html_dir: ../templates
+    root_dir: /usr/share/nginx/html
+    ngx_conf_dir: /etc/nginx
+    nginx_port: 80
+    cowsaymsg:  "This is server {{ ansible_hostname }}!"
+    htwo:  "This is server {{ ansible_hostname }}"
+    ttime: "{{ '%a %d %b %Y %H:%M:%S' | strftime(ansible_date_time.epoch) }}"
+
+  tasks:
+    - name: install cowsay
+      apt:
+        name: cowsay
+        state: latest
+      become: yes
+      tags: [cowsay, install]
+
+    - name: say cow
+      shell: 'cowsay {{ cowsaymsg }}'
+      register: cowsay_result
+      tags: cowsay
+
+    - name: install nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: latest
+      become: yes
+      tags: [nginx, install]
+
+    - name: update nginx config
+      ansible.builtin.template:
+        src: "{{ src_dir }}/nginx.conf"
+        dest: "{{ ngx_conf_dir }}/nginx.conf"
+      notify:
+        - restart nginx
+      become: yes
+      tags: nginx
+
+    - name: update html
+      ansible.builtin.template:
+        src: "{{ src_html_dir }}/index.html.j2"
+        dest: "{{ root_dir }}/index.html"
+      become: yes
+      tags: html
+
+  handlers:
+    - name: restart nginx
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded
+      become: yes
