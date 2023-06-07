@@ -1,0 +1,7 @@
+- import_playbook: pb_users_export.yaml
+  vars:
+    users: [chad, kevin]
+- import_playbook: pb_inst_git.yaml
+- import_playbook: pb_gitconf_export.yaml
+  vars:
+    users: [chad, kevin]

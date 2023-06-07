@@ -1,0 +1,12 @@
+- hosts: servs
+  vars: 
+    users: [jaime, sansa, robert]
+  gather_facts: no
+  tasks:
+    - name: add users
+      ansible.builtin.user:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ users }}"
+      tags: users
+      become: yes
