@@ -1,0 +1,11 @@
+users: [user1, user2, user3]
+reqrmnts: [git, nodejs, postgresql, postgresql-contrib, npm]
+node_app_location: /src/leaguestats/
+node_port: 3333
+pg_user: root
+pg_pass: root
+pg_port: 5432
+pg_db: leaguestats
+redis_port: 6379
+riot_key: <your Riot API key>
+action-set-users: add

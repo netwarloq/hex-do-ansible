@@ -1,0 +1,30 @@
+---
+- name: add users
+  ansible.builtin.user:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ users }}"
+  tags: users
+  become: yes
+  when: action_set_users == 'add'
+
+- name: gitconfig
+  ansible.builtin.template:
+    src: "../files/gitconfig_example"
+    dest: "/home/{{ item }}/.gitconfig"
+  loop: "{{ users }}"
+  tags: gitconf
+  become: yes
+  when: action_set_users == 'add'
+
+- name: remove users
+  ansible.builtin.user:
+    name: "{{ item }}"
+    state: absent
+    remove: true
+  loop: "{{ users }}"
+  tags: users
+  become: yes
+  when: action_set_users == 'del'
+
+

@@ -1,0 +1,11 @@
+roles:
+  # Install a role from Ansible Galaxy.
+  - name: geerlingguy.postgresql
+  - name: geerlingguy.git
+  - name: geerlingguy.nodejs
+  - name: geerlingguy.docker
+
+collections:
+  # Install a collections from Ansible Galaxy.
+  - name: community.general
+  - name: community.docker

@@ -1,0 +1,71 @@
+- hosts: appsrv2
+  gather_facts: yes
+  vars_files:
+    - ../files/vars-osm.yml
+
+  roles:
+  - role: geerlingguy.docker
+    tags: docker
+    become: yes
+
+  - role: '../roles/set-users'
+    vars:
+      # For delete users action_set_users: del
+      - action_set_users: add
+    tags: set-users
+
+  tasks:
+    - name: install requirements
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop: "{{ reqrmnts }}"
+      tags: instl
+
+    - name: Clone rep source
+      ansible.builtin.git:
+        repo: https://github.com/openstreetmap/openstreetmap-website.git
+        dest: "{{ app_location }}"
+        version: master
+        force: yes
+      tags: [app, clonerep]
+
+    - name: copy storage.yml
+      ansible.builtin.template:
+        src: "../templates/osm/example.storage.yml.j2"
+        dest: "{{ app_location }}/config/storage.yml"
+        become: yes
+      tags: app
+
+    - name: copy database.yml
+      ansible.builtin.template:
+        src: "../templates/osm/docker.database.yml.j2"
+        dest: "{{ app_location }}/config/database.yml"
+      become: yes
+      tags: app
+
+    - name: touch file
+      ansible.builtin.shell: |
+        touch settings.local.yml
+      args:
+        executable: /bin/bash
+        chdir: "{{ app_location }}/config/"
+      become: yes
+      tags: [app, touch]
+
+    - name: migration
+      ansible.builtin.shell: |
+        docker-compose run --rm web bundle exec rails db:migrate
+      args:
+        executable: /bin/bash
+        chdir: "{{ app_location }}/"
+      become: yes
+      tags: [app, migration]
+      
+    - name: run app
+      community.docker.docker_compose:
+        build: true
+        state: present
+        project_src: "{{ app_location }}"
+      tags: app_docker

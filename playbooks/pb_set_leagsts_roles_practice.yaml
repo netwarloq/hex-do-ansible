@@ -1,0 +1,98 @@
+- hosts: servs
+  gather_facts: yes
+  vars_files:
+    - ../files/vars.yml
+
+  roles:
+  - role: geerlingguy.postgresql
+    tags: postgres
+    become: yes
+  - role: '../roles/set-users'
+    vars:
+      - action_set_users: add
+    tags: set-users
+
+  tasks:
+    - name: install requirements
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop: "{{ reqrmnts }}"
+      tags: instl
+
+    - name: Clone rep source
+      ansible.builtin.git:
+        repo: https://github.com/vkaelin/LeagueStats.git
+        dest: "{{ node_app_location }}"
+        version: master
+      tags: [app, clonerep]
+
+    # - name: client install
+    #   community.general.npm:
+    #     path: "{{ node_app_location }}/client"
+    #   tags: app
+    
+    - name: client install
+      shell: |
+        npm install --legacy-peer-deps
+      args:
+        executable: /bin/bash
+        chdir: "{{ node_app_location }}/client/"
+      become: yes
+      tags: [app, client]
+
+    # - name: server install
+    #   community.general.npm:
+    #     path: "{{ node_app_location }}/server"
+    #   tags: app
+
+    - name: server install
+      shell: |
+        npm install --legacy-peer-deps
+      args:
+        executable: /bin/bash
+        chdir: "{{ node_app_location }}/server/"
+      become: yes
+      tags: app
+
+    - name: copy env
+      ansible.builtin.template:
+        src: "../templates/.env.example.j2"
+        dest: "{{ node_app_location }}/server/.env"
+      become: yes
+      tags: app
+
+    - name: node migr
+      shell: |
+        node ace migration:run
+      args:
+        executable: /bin/bash
+        chdir: "{{ node_app_location }}/server/"
+      become: yes
+      tags: [app, migr]
+
+    - name: client run app
+      ansible.builtin.shell: |
+        npm run dev
+      args:
+        executable: /bin/bash
+        chdir: "{{ node_app_location }}/client/"
+      become: yes
+      tags: [app, client]
+
+    - name: server run app
+      ansible.builtin.shell: |
+        npm run dev
+      args:
+        executable: /bin/bash
+        chdir: "{{ node_app_location }}/server/"
+      become: yes
+      tags: app
+
+    - name: run app
+      community.docker.docker_compose:
+        build: true
+        state: present
+        project_src: "{{ node_app_location }}"
+      tags: app_docker

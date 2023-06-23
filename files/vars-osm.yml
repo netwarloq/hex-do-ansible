@@ -1,0 +1,4 @@
+users: [jaime, sansa, robert]
+reqrmnts: [git, docker, docker-compose]
+app_location: /src/osm
+action-set-users: add
