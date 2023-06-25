@@ -1,2 +1,3 @@
 files/sshkeys
 files/vars.yml
+inventory-file/group_vars/all/vault.yml

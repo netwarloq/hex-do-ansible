@@ -1,0 +1,55 @@
+- hosts: appsrv2
+  gather_facts: no
+  vars_files:
+    - ../files/vars-vault.yml
+
+  tasks:
+    - name: install requirements
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop: "{{ pgks_list }}"
+      tags: instl
+
+    - name: Clone rep source
+      ansible.builtin.git:
+        repo: https://github.com/hexlet-components/devops-example-app.git
+        dest: "{{ app_location }}"
+        force: yes
+      tags: [app, clonerep]
+
+    - name: build app
+      community.docker.docker_image:
+        build:
+          path: "{{ app_location }}"
+        name: 'hexletcomponents/devops-example-app:mytag'
+        source: build
+        force_source: true
+      tags: [app, docker, build]
+      notify:
+        - restart app
+
+    - name: run app
+      community.docker.docker_container:
+        name: devops-example-app
+        image:  'hexletcomponents/devops-example-app:mytag'
+        state: present
+        ports:
+          - 8080:3000
+        env:
+          SERVER_MESSAGE: "{{ srv_msg }}"
+          ROLLBAR_TOKEN: "{{ access_rollbar_token }}"
+      tags: [app, docker, run]
+
+  handlers:
+    - name: restart app
+      community.docker.docker_container:
+        name: devops-example-app
+        image:  'hexletcomponents/devops-example-app:mytag'
+        state: started
+        restart: true
+        # ports:
+          # - 8080:3000
+      tags: [app, docker, run]
+      listen: restart app

@@ -1,0 +1,3 @@
+pgks_list: [git, make, docker]
+srv_msg: "Hexlet Awesome Server!!"
+app_location: '/src/devops-example-app'

@@ -1,0 +1,3 @@
+users: [adom, philip, tom]
+keys_locations: '../files/sshkeys'
+pgks_list: [git, htop, net-tools, tcpdump, screenfetch]

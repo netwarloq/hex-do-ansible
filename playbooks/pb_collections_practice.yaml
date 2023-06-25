@@ -1,0 +1,28 @@
+- hosts: appsrv2
+  gather_facts: no
+  vars_files:
+    - ../files/vars-collections.yml
+
+  roles:
+  - role: '../roles/set-users'
+    vars:
+      # For delete users action_set_users: del
+      - action_set_users: add
+    tags: [users, git]
+
+  tasks:
+    - name: Set auth keys
+      ansible.posix.authorized_key:
+        user: "{{ item }}"
+        state: present
+        key: "{{ lookup('file', '/home/netwrloq/.sshkeys/{{ item }}.pub') }}"
+      loop: "{{ users }}"
+      tags: [users, ssh]
+
+    - name: Install utils
+      ansible.builtin.apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop: "{{ pgks_list }}"
+      tags: instl
